@@ -1,4 +1,9 @@
 name: Run Tests
+
+env:
+  MIX_ENV: test
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on: push
 
 jobs:
@@ -33,4 +38,6 @@ jobs:
       run: |
         mix deps.get
         
-    - run: mix test
+    - name: Run Tests
+      run: |
+        mix coveralls.github
