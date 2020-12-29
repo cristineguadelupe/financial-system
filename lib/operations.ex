@@ -3,17 +3,17 @@ defmodule FinancialSystem.Operations do
   Implementa as operações de incremento e decremento em valores monetários em uma mesma moeda
   e a conversão entre moedas
   """
-  defguard is_valid(amount) when is_integer(amount) and amount > 0
+  alias FinancialSystem.Schemas.Money
+  alias FinancialSystem.Schemas.Currency
+
+  defguard is_valid_amount(amount) when is_integer(amount) and amount > 0
 
   defguard is_valid_exchange(amount, rate)
            when is_integer(amount) and is_float(rate) and amount > 0 and rate > 0
 
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Schemas.Currency
-
   @spec withdraw(balance :: Money.t(), amount :: integer()) ::
           {:ok, Money.t()} | {:error, String.t()}
-  def withdraw(balance, amount) when is_valid(amount) do
+  def withdraw(balance, amount) when is_valid_amount(amount) do
     balance
     |> to_value()
     |> check_balance(amount)
@@ -26,7 +26,7 @@ defmodule FinancialSystem.Operations do
 
   @spec deposit(balance :: Money.t(), amount :: integer()) ::
           {:ok, Money.t()} | {:error, String.t()}
-  def deposit(balance, amount) when is_valid(amount) do
+  def deposit(balance, amount) when is_valid_amount(amount) do
     balance
     |> to_value()
     |> increase(amount)
