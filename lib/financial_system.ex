@@ -4,6 +4,7 @@ defmodule FinancialSystem do
   """
 
   alias FinancialSystem.Schemas.Account
+  alias FinancialSystem.Schemas.Money
   alias FinancialSystem.Operations
 
   @spec transfer_from_to(sender :: Account.t(), receiver :: Account.t(), amount :: String.t()) ::
@@ -17,6 +18,22 @@ defmodule FinancialSystem do
   def transfer_from_to(sender, receiver, amount) do
     with {:ok, sender} <- debit_from(sender, amount),
          {:ok, receiver} <- deposit_to(receiver, amount) do
+      {:ok, {sender, receiver}}
+    end
+  end
+
+  @spec international_transfer(
+          sender :: Account.t(),
+          receiver :: Account.t(),
+          amount :: integer(),
+          currency :: Currency.t(),
+          rate :: float()
+        ) :: {:ok, {Account.t(), Account.t()}} | {:error, String.t()}
+  def international_transfer(sender, receiver, amount, currency, rate) do
+    with {:ok, converted_amount} <- Operations.simple_exchange(amount, rate),
+         {:ok, sender} <- debit_from(sender, converted_amount),
+         {:ok, receiver} <- deposit_to(receiver, amount),
+         {:ok, _currency} <- validate_currencies(receiver, currency) do
       {:ok, {sender, receiver}}
     end
   end
@@ -60,4 +77,12 @@ defmodule FinancialSystem do
   end
 
   defp validate_amount(false, _amount), do: :error
+
+  defp validate_currencies(%Account{balance: %Money{currency: currency}}, currency) do
+    {:ok, currency}
+  end
+
+  defp validate_currencies(_currency, _different_currency) do
+    {:error, "Moeda incompatível com a conta de destino"}
+  end
 end

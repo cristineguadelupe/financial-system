@@ -6,10 +6,17 @@ defmodule FinancialSystemTest do
   alias FinancialSystem.Schemas.Money
 
   alias FinancialSystem.Data.Accounts
+  alias FinancialSystem.Data.Currencies
+  alias FinancialSystem.Data.Moneys
 
   @sender Accounts.open_account(1, "250,00")
   @receiver Accounts.open_account(2, "10,00")
   @not_found Accounts.find(5)
+
+  @euro Currencies.find("EUR") |> elem(1)
+  @usd Currencies.find("USD") |> elem(1)
+  @balance Moneys.create(50, 0, @usd) |> elem(1)
+  @usd_account Accounts.create(10, @balance)
 
   describe "transfer_from_to/3" do
     test "Retorna os saldos atualizados após uma transferência válida" do
@@ -152,6 +159,98 @@ defmodule FinancialSystemTest do
 
       assert FinancialSystem.transfer_from_to(@not_found, @receiver, 125_00) ==
                {:error, "Conta não encontrada"}
+    end
+  end
+
+  describe "international_tranfer_from_to/5" do
+    test "Retorna os saldos atualizados após uma transferência internacional válida" do
+      sender_after_send_10_20_usd = %Account{
+        balance: %Money{
+          currency: %Currency{
+            code: "BRL",
+            name: "Real",
+            number: 986,
+            precision: 2
+          },
+          decimal: 45,
+          int: 196
+        },
+        id: 1
+      }
+
+      international_receiver_after_receive_10_00_usd = %Account{
+        balance: %Money{
+          currency: %Currency{
+            code: "USD",
+            name: "Dólar Americano",
+            number: 840,
+            precision: 2
+          },
+          decimal: 20,
+          int: 60
+        },
+        id: 10
+      }
+
+      sender_after_send_15_35_usd = %Account{
+        balance: %Money{
+          currency: %Currency{
+            code: "BRL",
+            name: "Real",
+            number: 986,
+            precision: 2
+          },
+          decimal: 41,
+          int: 169
+        },
+        id: 1
+      }
+
+      international_receiver_after_receive_15_35_usd = %Account{
+        balance: %Money{
+          currency: %Currency{
+            code: "USD",
+            name: "Dólar Americano",
+            number: 840,
+            precision: 2
+          },
+          decimal: 35,
+          int: 65
+        },
+        id: 10
+      }
+
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 10_20, @usd, 5.25) ==
+               {:ok,
+                {sender_after_send_10_20_usd, international_receiver_after_receive_10_00_usd}}
+
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 15_35, @usd, 5.25) ==
+               {:ok,
+                {sender_after_send_15_35_usd, international_receiver_after_receive_15_35_usd}}
+    end
+
+    test "Falha ao tentar transferir valores acima do saldo disponível" do
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 200_00, @usd, 5.25) ==
+               {:error, "Saldo insuficiente"}
+    end
+
+    test "Falha ao tentar transferir em moeda diferente da moeda da conta destinatária" do
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 32_56, @euro, 6.32) ==
+               {:error, "Moeda incompatível com a conta de destino"}
+    end
+
+    test "Falha ao informar dados inválidos para conversão" do
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, 0) ==
+               {:error, "Dados inválidos para conversão entre moedas"}
+
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, -5.25) ==
+               {:error, "Dados inválidos para conversão entre moedas"}
+
+      assert FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, "teste") ==
+               {:error, "Dados inválidos para conversão entre moedas"}
+
+      assert FinancialSystem.international_transfer(@sender, @usd_account, "invalido", @usd, 5.25) ==
+               {:error, "Dados inválidos para conversão entre moedas"}
     end
   end
 end
