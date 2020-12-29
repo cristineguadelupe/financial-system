@@ -104,61 +104,61 @@ defmodule FinancialSystemTest do
         id: 2
       }
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, 100_00) ==
-               {:ok, {sender_after_send_100_00, receiver_after_receive_100_00}}
+      assert {:ok, {sender_after_send_100_00, receiver_after_receive_100_00}} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, 100_00)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, 250_00) ==
-               {:ok, {sender_after_send_250_00, receiver_after_receive_250_00}}
+      assert {:ok, {sender_after_send_250_00, receiver_after_receive_250_00}} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, 250_00)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, 95_12) ==
-               {:ok, {sender_after_send_95_12, receiver_after_receive_95_12}}
+      assert {:ok, {sender_after_send_95_12, receiver_after_receive_95_12}} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, 95_12)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, "95,12") ==
-               {:ok, {sender_after_send_95_12, receiver_after_receive_95_12}}
+      assert {:ok, {sender_after_send_95_12, receiver_after_receive_95_12}} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, "95,12")
     end
 
     test "Falha ao tentar transferir valores maiores que o saldo disponível" do
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, 350_00) ==
-               {:error, "Saldo insuficiente"}
+      assert {:error, "Saldo insuficiente"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, 350_00)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, 250_01) ==
-               {:error, "Saldo insuficiente"}
+      assert {:error, "Saldo insuficiente"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, 250_01)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, "2.050,01") ==
-               {:error, "Saldo insuficiente"}
+      assert {:error, "Saldo insuficiente"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, "2.050,01")
     end
 
     test "Falha ao tentar transferir valores negativos ou inválidos" do
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, -123_09) ==
-               {:error, "O valor a ser debitado precisa ser positivo"}
+      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, -123_09)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, "-123_09") ==
-               {:error, "O valor a ser debitado precisa ser positivo"}
+      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, "-123_09")
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, 0) ==
-               {:error, "O valor a ser debitado precisa ser positivo"}
+      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, 0)
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, "Inválido") ==
-               {:error, "O valor a ser debitado precisa ser positivo"}
+      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, "Inválido")
 
-      assert FinancialSystem.transfer_from_to(@sender, @receiver, "10not12309a90,80number") ==
-               {:error, "O valor a ser debitado precisa ser positivo"}
+      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
+               FinancialSystem.transfer_from_to(@sender, @receiver, "10not12309a90,80number")
     end
 
     test "Falha ao tentar transferir entre contas inválidas" do
-      assert FinancialSystem.transfer_from_to(@sender, "Inválida", 125_00) ==
-               {:error, "Operação inválida"}
+      assert {:error, "Operação inválida"} ==
+               FinancialSystem.transfer_from_to(@sender, "Inválida", 125_00)
 
-      assert FinancialSystem.transfer_from_to("Inválida", @receiver, 125_00) ==
-               {:error, "Operação inválida"}
+      assert {:error, "Operação inválida"} ==
+               FinancialSystem.transfer_from_to("Inválida", @receiver, 125_00)
     end
 
     test "Falha ao tentar transferir para uma conta não encontrada" do
-      assert FinancialSystem.transfer_from_to(@sender, @not_found, 125_00) ==
-               {:error, "Conta não encontrada"}
+      assert {:error, "Conta não encontrada"} ==
+               FinancialSystem.transfer_from_to(@sender, @not_found, 125_00)
 
-      assert FinancialSystem.transfer_from_to(@not_found, @receiver, 125_00) ==
-               {:error, "Conta não encontrada"}
+      assert {:error, "Conta não encontrada"} ==
+               FinancialSystem.transfer_from_to(@not_found, @receiver, 125_00)
     end
   end
 
@@ -220,13 +220,11 @@ defmodule FinancialSystemTest do
         id: 10
       }
 
-      assert FinancialSystem.international_transfer(@sender, @usd_account, 10_20, @usd, 5.25) ==
-               {:ok,
-                {sender_after_send_10_20_usd, international_receiver_after_receive_10_00_usd}}
+      assert {:ok, {sender_after_send_10_20_usd, international_receiver_after_receive_10_00_usd}} ==
+               FinancialSystem.international_transfer(@sender, @usd_account, 10_20, @usd, 5.25)
 
-      assert FinancialSystem.international_transfer(@sender, @usd_account, 15_35, @usd, 5.25) ==
-               {:ok,
-                {sender_after_send_15_35_usd, international_receiver_after_receive_15_35_usd}}
+      assert {:ok, {sender_after_send_15_35_usd, international_receiver_after_receive_15_35_usd}} ==
+               FinancialSystem.international_transfer(@sender, @usd_account, 15_35, @usd, 5.25)
     end
 
     test "Falha ao tentar transferir valores acima do saldo disponível" do
@@ -235,22 +233,28 @@ defmodule FinancialSystemTest do
     end
 
     test "Falha ao tentar transferir em moeda diferente da moeda da conta destinatária" do
-      assert FinancialSystem.international_transfer(@sender, @usd_account, 32_56, @euro, 6.32) ==
-               {:error, "Moeda incompatível com a conta de destino"}
+      assert {:error, "Moeda incompatível com a conta de destino"} ==
+               FinancialSystem.international_transfer(@sender, @usd_account, 32_56, @euro, 6.32)
     end
 
     test "Falha ao informar dados inválidos para conversão" do
-      assert FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, 0) ==
-               {:error, "Dados inválidos para conversão entre moedas"}
+      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+               FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, 0)
 
-      assert FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, -5.25) ==
-               {:error, "Dados inválidos para conversão entre moedas"}
+      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+               FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, -5.25)
 
-      assert FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, "teste") ==
-               {:error, "Dados inválidos para conversão entre moedas"}
+      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+               FinancialSystem.international_transfer(@sender, @usd_account, 23_05, @usd, "teste")
 
-      assert FinancialSystem.international_transfer(@sender, @usd_account, "invalido", @usd, 5.25) ==
-               {:error, "Dados inválidos para conversão entre moedas"}
+      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+               FinancialSystem.international_transfer(
+                 @sender,
+                 @usd_account,
+                 "invalido",
+                 @usd,
+                 5.25
+               )
     end
   end
 end
