@@ -160,6 +160,11 @@ defmodule FinancialSystemTest do
       assert {:error, "Conta não encontrada"} ==
                FinancialSystem.transfer_from_to(@not_found, @receiver, 125_00)
     end
+
+    test "Falha ao tentar tranferir para contas de moeda diferente" do
+      assert {:error, "Moeda incompatível com a conta de destino"} ==
+               FinancialSystem.transfer_from_to(@sender, @usd_account, 200_00)
+    end
   end
 
   describe "international_tranfer_from_to/5" do

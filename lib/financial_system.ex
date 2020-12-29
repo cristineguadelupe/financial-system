@@ -17,7 +17,8 @@ defmodule FinancialSystem do
           {atom(), {Account.t(), Account.t()}} | {atom(), String.t()}
   def transfer_from_to(sender, receiver, amount) do
     with {:ok, sender} <- debit_from(sender, amount),
-         {:ok, receiver} <- deposit_to(receiver, amount) do
+         {:ok, receiver} <- deposit_to(receiver, amount),
+         {:ok, _currency} <- validate_currencies(sender, receiver) do
       {:ok, {sender, receiver}}
     end
   end
@@ -77,6 +78,12 @@ defmodule FinancialSystem do
   end
 
   defp validate_amount(false, _amount), do: :error
+
+  defp validate_currencies(%Account{balance: %Money{currency: currency}}, %Account{
+         balance: %Money{currency: currency}
+       }) do
+    {:ok, currency}
+  end
 
   defp validate_currencies(%Account{balance: %Money{currency: currency}}, currency) do
     {:ok, currency}
