@@ -1,8 +1,12 @@
 defmodule FinancialSystem.Operations do
   @moduledoc """
   Implementa as operações de incremento e decremento em valores monetários em uma mesma moeda
+  e a conversão entre moedas
   """
   defguard is_valid(amount) when is_integer(amount) and amount > 0
+
+  defguard is_valid_exchange(amount, rate)
+           when is_integer(amount) and is_float(rate) and amount > 0 and rate > 0
 
   alias FinancialSystem.Schemas.Money
   alias FinancialSystem.Schemas.Currency
@@ -32,8 +36,26 @@ defmodule FinancialSystem.Operations do
 
   def deposit(_balance, _amount), do: {:error, "O valor a ser creditado precisa ser positivo"}
 
+  @doc """
+  Conversão simples entre moedas supondo que o montande e a taxa de câmbio sejam válidos
+  """
+  @spec simple_exchange(amount :: integer(), rate :: float()) :: {:ok, integer()}
+  def simple_exchange(amount, rate) when is_valid_exchange(amount, rate) do
+    converted_amount =
+      rate
+      |> Float.round(2)
+      |> Kernel.*(amount)
+      |> round()
+
+    {:ok, converted_amount}
+  end
+
+  def simple_exchange(_amount, _rate) do
+    {:error, "Dados inválidos para conversão entre moedas"}
+  end
+
   @spec to_value(Money.t()) :: integer()
-  def to_value(%Money{int: int, decimal: decimal, currency: currency}) do
+  defp to_value(%Money{int: int, decimal: decimal, currency: currency}) do
     precision = get_precision(currency)
     int * precision + decimal
   end

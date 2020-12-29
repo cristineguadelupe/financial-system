@@ -127,4 +127,24 @@ defmodule FinancialSystem.OperationsTest do
       assert Operations.withdraw(@balance, 1006) == {:error, "Saldo insuficiente"}
     end
   end
+
+  describe "simple_exchange/2" do
+    test "Retorna o valor convertido em uma conversão válida" do
+      assert Operations.simple_exchange(10_00, 5.25) == {:ok, 52_50}
+      assert Operations.simple_exchange(10_00, 1.35987) == {:ok, 13_60}
+      assert Operations.simple_exchange(10_00, 5.2433) == {:ok, 52_40}
+      assert Operations.simple_exchange(15_10, 5.25) == {:ok, 79_28}
+    end
+
+    test "Falha ao tentar converter valores inválidos" do
+      assert Operations.simple_exchange("10", 5.25) ==
+               {:error, "Dados inválidos para conversão entre moedas"}
+
+      assert Operations.simple_exchange("Inválido", 13.10) ==
+               {:error, "Dados inválidos para conversão entre moedas"}
+
+      assert Operations.simple_exchange(25_32, 8) ==
+               {:error, "Dados inválidos para conversão entre moedas"}
+    end
+  end
 end
