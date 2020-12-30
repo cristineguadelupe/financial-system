@@ -206,4 +206,121 @@ defmodule FinancialSystemTest do
                )
     end
   end
+
+  describe "split_from_to/3" do
+    setup do
+      [
+        acc1: Accounts.open_account(11, "300,00"),
+        acc2: Accounts.open_account(22, "10,00"),
+        acc3: Accounts.open_account(33, "0,00"),
+        acc4: Accounts.open_account(44, "25,32")
+      ]
+    end
+
+    test "Retorna os saldos atualizados quando um split é realizado com sucesso", test_data do
+      assert {:ok,
+              {%Account{balance: %Money{int: 200, decimal: 0}},
+               [
+                 %Account{balance: %Money{int: 43, decimal: 33}},
+                 %Account{balance: %Money{int: 33, decimal: 33}},
+                 %Account{balance: %Money{int: 58, decimal: 65}}
+               ]}} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], test_data[:acc3], test_data[:acc4]],
+                 100_00
+               )
+
+      assert {:ok,
+              {%Account{balance: %Money{int: 0, decimal: 0}},
+               [
+                 %Account{balance: %Money{int: 160, decimal: 00}},
+                 %Account{balance: %Money{int: 150, decimal: 00}}
+               ]}} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], test_data[:acc3]],
+                 300_00
+               )
+    end
+
+    test "Falha ao informar montantes acima do saldo disponível", test_data do
+      assert {:error, "Saldo insuficiente"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], test_data[:acc3]],
+                 450_00
+               )
+    end
+
+    test "Falha ao tentar split para menos de duas contas", test_data do
+      assert {:error, "O split necessita de ao menos duas contas de destino"} =
+               FinancialSystem.split_from_to(test_data[:acc1], [test_data[:acc2]], 120_90)
+    end
+
+    test "Falha ao informar montantes inferiores ao mínimo necessário", test_data do
+      assert {:error, "Valor insuficiente para ser divido entre as contas"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], test_data[:acc3], test_data[:acc4]],
+                 2
+               )
+
+      assert {:error, "Valor insuficiente para ser divido entre as contas"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], test_data[:acc3]],
+                 1
+               )
+    end
+
+    test "Falha o informar contas de destino inválidas", test_data do
+      assert {:error, "Contas de destino inválidas"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 "inválido",
+                 10_00
+               )
+
+      assert {:error, "Contas de destino inválidas"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [1, 2, 3],
+                 10_00
+               )
+
+      assert {:error, "Contas de destino inválidas"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], 2, 3],
+                 10_00
+               )
+
+      assert {:error, "Contas de destino inválidas"} =
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], "invalida", test_data[:acc3]],
+                 10_00
+               )
+    end
+
+    test "Falha ao tentar um split com outros dados inválidos", test_data do
+      assert {:error, "Operação inválida"} =
+               FinancialSystem.split_from_to(
+                 "invalido",
+                 [test_data[:acc2], test_data[:acc3]],
+                 10_00
+               )
+    end
+
+    test "Falha ao tentar realizar split entre contas com diferentes moedas", test_data do
+      assert {:error, "Não é possível realizar split entre diferentes moedas"} =
+        FinancialSystem.split_from_to(
+          test_data[:acc1],
+          [test_data[:acc2], test_data[:acc3], test_data[:usd_account]],
+          10_00
+        )
+    end
+
+  end
 end
