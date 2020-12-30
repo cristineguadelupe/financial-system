@@ -6,7 +6,12 @@ defmodule FinancialSystem.OperationsTest do
   alias FinancialSystem.Data.Accounts
 
   setup_all do
-    [balance: Accounts.open_account(1, "10,05") |> elem(1) |> Map.fetch!(:balance)]
+    [
+      balance: Accounts.open_account(1, "10,05") |> elem(1) |> Map.fetch!(:balance),
+      acc1: Accounts.open_account(11, "100,00") |> elem(1),
+      acc2: Accounts.open_account(12, "55,00") |> elem(1),
+      acc3: Accounts.open_account(13, "23,00") |> elem(1)
+    ]
   end
 
   describe "defguard is_valid_amount/1" do
@@ -35,6 +40,27 @@ defmodule FinancialSystem.OperationsTest do
       assert Operations.is_valid_exchange(25_90, 0) == false
       assert Operations.is_valid_exchange(25_90, -2.32) == false
       assert Operations.is_valid_exchange(25_90, "teste") == false
+    end
+  end
+
+  describe "defguard is_valid_split/2" do
+    # O guard não checa o tipo dos itens da lista, portanto uma lista que não contenha
+    # exclusivamente contas válidas mas cumpra os demais requerimentos será considerada válida.
+    # A validação das contas é feita em etapa anterior pelo módulo FinancialSystem
+    test "Retorna true quando a lista e o montante são válidos para um split", test_data do
+      assert Operations.is_valid_split(
+               [test_data[:acc1], test_data[:acc2], test_data[:acc3]],
+               100_00
+             ) == true
+
+      assert Operations.is_valid_split([test_data[:acc1], test_data[:acc2]], 30_00) == true
+      assert Operations.is_valid_split([1, 2, 3], 30_00) == true
+    end
+
+    test "Retorna false quando os valores são inválidos", test_data do
+      assert Operations.is_valid_split([], 100_00) == false
+      assert Operations.is_valid_split([test_data[:acc1], test_data[:acc2]], -302) == false
+      assert Operations.is_valid_split([test_data[:acc1], test_data[:acc2]], "invalido") == false
     end
   end
 
@@ -100,6 +126,46 @@ defmodule FinancialSystem.OperationsTest do
 
       assert {:error, "Dados inválidos para conversão entre moedas"} =
                Operations.simple_exchange(25_32, 8)
+    end
+  end
+
+  describe "split_amount_by/2" do
+    test "Retorna o valor dividido quando os dados são válidos", test_data do
+      assert {:ok, 33_33} =
+               Operations.split_amount_by(
+                 [test_data[:acc1], test_data[:acc2], test_data[:acc3]],
+                 100_00
+               )
+
+      assert {:ok, 50_00} =
+               Operations.split_amount_by(
+                 [test_data[:acc1], test_data[:acc2]],
+                 100_00
+               )
+    end
+
+    test "Falha ao tentar fazer um split entre menos de duas contas", test_data do
+      assert {:error, "O split necessita de ao menos duas contas de destino"} =
+               Operations.split_amount_by([test_data[:acc1]], 100_00)
+    end
+
+    test "Falha ao não informar uma lista de contas e um montante válidos", test_data do
+      assert {:error, "Dados inválidos para realização do split"} =
+               Operations.split_amount_by("teste", 100_00)
+
+      assert {:error, "Dados inválidos para realização do split"} =
+               Operations.split_amount_by(test_data[:acc1], 100_00)
+
+      assert {:error, "Dados inválidos para realização do split"} =
+               Operations.split_amount_by([test_data[:acc1], test_data[:acc2]], "invalido")
+    end
+
+    test "Falha quando o valor informado é 0 ou negativo", test_data do
+      assert {:error, "O montante para o split não pode ser 0 ou negativo"} =
+               Operations.split_amount_by([test_data[:acc1], test_data[:acc2]], 0)
+
+      assert {:error, "O montante para o split não pode ser 0 ou negativo"} =
+               Operations.split_amount_by([test_data[:acc1], test_data[:acc2]], -12_00)
     end
   end
 end

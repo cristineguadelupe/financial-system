@@ -11,6 +11,10 @@ defmodule FinancialSystem.Operations do
   defguard is_valid_exchange(amount, rate)
            when is_integer(amount) and is_float(rate) and amount > 0 and rate > 0
 
+  defguard is_valid_split(receivers, amount)
+           when is_list(receivers) and is_integer(amount) and length(receivers) >= 2 and
+                  amount > 0
+
   @spec withdraw(balance :: Money.t(), amount :: integer()) ::
           {:ok, Money.t()} | {:error, String.t()}
   def withdraw(balance, amount) when is_valid_amount(amount) do
@@ -53,6 +57,28 @@ defmodule FinancialSystem.Operations do
   def simple_exchange(_amount, _rate) do
     {:error, "Dados inválidos para conversão entre moedas"}
   end
+
+  def split_amount_by(receivers, _amount) when length(receivers) == 1 do
+    {:error, "O split necessita de ao menos duas contas de destino"}
+  end
+
+  @spec split_amount_by(receivers :: nonempty_list(Account.t()), amount :: non_neg_integer()) ::
+          {:ok, non_neg_integer()} | {:error, String.t()}
+  def split_amount_by(receivers, amount) when is_valid_split(receivers, amount) do
+    splited_amount = div(amount, length(receivers))
+
+    case splited_amount do
+      0 -> {:error, "Valor insuficiente para ser divido entre as contas"}
+      _ -> {:ok, splited_amount}
+    end
+  end
+
+  def split_amount_by(_receivers, amount) when amount <= 0 do
+    {:error, "O montante para o split não pode ser 0 ou negativo"}
+  end
+
+  def split_amount_by(_receivers, _amount),
+    do: {:error, "Dados inválidos para realização do split"}
 
   @spec to_value(Money.t()) :: integer()
   defp to_value(%Money{int: int, decimal: decimal, currency: currency}) do
