@@ -20,101 +20,28 @@ defmodule FinancialSystemTest do
 
   describe "transfer_from_to/3" do
     test "Retorna os saldos atualizados após uma transferência válida" do
-      sender_after_send_100_00 = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 0,
-          int: 150
-        },
-        id: 1
-      }
+      sender = Accounts.open_account(1, "250,00")
+      receiver = Accounts.open_account(2, "10,00")
 
-      receiver_after_receive_100_00 = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 0,
-          int: 110
-        },
-        id: 2
-      }
+      assert {:ok,
+              {%Account{balance: %Money{int: 150, decimal: 0}},
+               %Account{balance: %Money{int: 110, decimal: 0}}}} =
+               FinancialSystem.transfer_from_to(sender, receiver, 100_00)
 
-      sender_after_send_250_00 = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 0,
-          int: 0
-        },
-        id: 1
-      }
+      assert {:ok,
+              {%Account{balance: %Money{int: 0, decimal: 0}},
+               %Account{balance: %Money{int: 260, decimal: 0}}}} =
+               FinancialSystem.transfer_from_to(sender, receiver, 250_00)
 
-      receiver_after_receive_250_00 = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 0,
-          int: 260
-        },
-        id: 2
-      }
+      assert {:ok,
+              {%Account{balance: %Money{int: 154, decimal: 88}},
+               %Account{balance: %Money{int: 105, decimal: 12}}}} =
+               FinancialSystem.transfer_from_to(sender, receiver, 95_12)
 
-      sender_after_send_95_12 = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 88,
-          int: 154
-        },
-        id: 1
-      }
-
-      receiver_after_receive_95_12 = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 12,
-          int: 105
-        },
-        id: 2
-      }
-
-      assert {:ok, {sender_after_send_100_00, receiver_after_receive_100_00}} ==
-               FinancialSystem.transfer_from_to(@sender, @receiver, 100_00)
-
-      assert {:ok, {sender_after_send_250_00, receiver_after_receive_250_00}} ==
-               FinancialSystem.transfer_from_to(@sender, @receiver, 250_00)
-
-      assert {:ok, {sender_after_send_95_12, receiver_after_receive_95_12}} ==
-               FinancialSystem.transfer_from_to(@sender, @receiver, 95_12)
-
-      assert {:ok, {sender_after_send_95_12, receiver_after_receive_95_12}} ==
-               FinancialSystem.transfer_from_to(@sender, @receiver, "95,12")
+      assert {:ok,
+              {%Account{balance: %Money{int: 154, decimal: 88}},
+               %Account{balance: %Money{int: 105, decimal: 12}}}} =
+               FinancialSystem.transfer_from_to(sender, receiver, "95,12")
     end
 
     test "Falha ao tentar transferir valores maiores que o saldo disponível" do
@@ -169,66 +96,14 @@ defmodule FinancialSystemTest do
 
   describe "international_tranfer_from_to/5" do
     test "Retorna os saldos atualizados após uma transferência internacional válida" do
-      sender_after_send_10_20_usd = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 45,
-          int: 196
-        },
-        id: 1
-      }
-
-      international_receiver_after_receive_10_00_usd = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "USD",
-            name: "Dólar Americano",
-            number: 840,
-            precision: 2
-          },
-          decimal: 20,
-          int: 60
-        },
-        id: 10
-      }
-
-      sender_after_send_15_35_usd = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "BRL",
-            name: "Real",
-            number: 986,
-            precision: 2
-          },
-          decimal: 41,
-          int: 169
-        },
-        id: 1
-      }
-
-      international_receiver_after_receive_15_35_usd = %Account{
-        balance: %Money{
-          currency: %Currency{
-            code: "USD",
-            name: "Dólar Americano",
-            number: 840,
-            precision: 2
-          },
-          decimal: 35,
-          int: 65
-        },
-        id: 10
-      }
-
-      assert {:ok, {sender_after_send_10_20_usd, international_receiver_after_receive_10_00_usd}} ==
+      assert {:ok,
+              {%Account{balance: %Money{int: 196, decimal: 45}},
+               %Account{balance: %Money{int: 60, decimal: 20}}}} =
                FinancialSystem.international_transfer(@sender, @usd_account, 10_20, @usd, 5.25)
 
-      assert {:ok, {sender_after_send_15_35_usd, international_receiver_after_receive_15_35_usd}} ==
+      assert {:ok,
+              {%Account{balance: %Money{int: 169, decimal: 41}},
+               %Account{balance: %Money{int: 65, decimal: 35}}}} =
                FinancialSystem.international_transfer(@sender, @usd_account, 15_35, @usd, 5.25)
     end
 
