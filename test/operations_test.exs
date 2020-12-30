@@ -5,7 +5,9 @@ defmodule FinancialSystem.OperationsTest do
   alias FinancialSystem.Schemas.Money
   alias FinancialSystem.Data.Accounts
 
-  @balance Accounts.open_account(1, "10,05") |> elem(1) |> Map.fetch!(:balance)
+  setup_all do
+    [balance: Accounts.open_account(1, "10,05") |> elem(1) |> Map.fetch!(:balance)]
+  end
 
   describe "defguard is_valid_amount/1" do
     test "Retorna true quando o montande é válido" do
@@ -37,131 +39,66 @@ defmodule FinancialSystem.OperationsTest do
   end
 
   describe "deposit/2" do
-    test "Retorna o saldo atualizado após um incremento" do
-      after_add_1_25 = %Money{
-        currency: %FinancialSystem.Schemas.Currency{
-          code: "BRL",
-          name: "Real",
-          number: 986,
-          precision: 2
-        },
-        decimal: 30,
-        int: 11
-      }
+    test "Retorna o saldo atualizado após um incremento", test_data do
+      assert {:ok, %Money{int: 11, decimal: 30}} = Operations.deposit(test_data[:balance], 125)
 
-      after_add_50_50 = %Money{
-        currency: %FinancialSystem.Schemas.Currency{
-          code: "BRL",
-          name: "Real",
-          number: 986,
-          precision: 2
-        },
-        decimal: 55,
-        int: 60
-      }
-
-      assert {:ok, after_add_1_25} == Operations.deposit(@balance, 125)
-      assert {:ok, after_add_50_50} == Operations.deposit(@balance, 5050)
+      assert {:ok, %Money{int: 60, decimal: 55}} = Operations.deposit(test_data[:balance], 5050)
     end
 
-    test "Falha ao tentar depositar valores não positivos" do
-      assert {:error, "O valor a ser creditado precisa ser positivo"} ==
-               Operations.deposit(@balance, 0)
+    test "Falha ao tentar depositar valores não positivos", test_data do
+      assert {:error, "O valor a ser creditado precisa ser positivo"} =
+               Operations.deposit(test_data[:balance], 0)
 
-      assert {:error, "O valor a ser creditado precisa ser positivo"} ==
-               Operations.deposit(@balance, -250)
+      assert {:error, "O valor a ser creditado precisa ser positivo"} =
+               Operations.deposit(test_data[:balance], -250)
 
-      assert {:error, "O valor a ser creditado precisa ser positivo"} ==
-               Operations.deposit(@balance, "Invalido")
+      assert {:error, "O valor a ser creditado precisa ser positivo"} =
+               Operations.deposit(test_data[:balance], "Invalido")
     end
   end
 
   describe "withdraw/2" do
-    test "Retorna o saldo atualizado após um decremento" do
-      after_remove_1_25 = %Money{
-        currency: %FinancialSystem.Schemas.Currency{
-          code: "BRL",
-          name: "Real",
-          number: 986,
-          precision: 2
-        },
-        decimal: 80,
-        int: 8
-      }
-
-      after_remove_8_50 = %Money{
-        currency: %FinancialSystem.Schemas.Currency{
-          code: "BRL",
-          name: "Real",
-          number: 986,
-          precision: 2
-        },
-        decimal: 55,
-        int: 1
-      }
-
-      after_remove_10_04 = %Money{
-        currency: %FinancialSystem.Schemas.Currency{
-          code: "BRL",
-          name: "Real",
-          number: 986,
-          precision: 2
-        },
-        decimal: 1,
-        int: 0
-      }
-
-      after_remove_10_05 = %Money{
-        currency: %FinancialSystem.Schemas.Currency{
-          code: "BRL",
-          name: "Real",
-          number: 986,
-          precision: 2
-        },
-        decimal: 0,
-        int: 0
-      }
-
-      assert {:ok, after_remove_1_25} == Operations.withdraw(@balance, 125)
-      assert {:ok, after_remove_8_50} == Operations.withdraw(@balance, 850)
-      assert {:ok, after_remove_10_04} == Operations.withdraw(@balance, 1004)
-      assert {:ok, after_remove_10_05} == Operations.withdraw(@balance, 1005)
+    test "Retorna o saldo atualizado após um decremento", test_data do
+      assert {:ok, %Money{int: 8, decimal: 80}} = Operations.withdraw(test_data[:balance], 1_25)
+      assert {:ok, %Money{int: 1, decimal: 55}} = Operations.withdraw(test_data[:balance], 8_50)
+      assert {:ok, %Money{int: 0, decimal: 1}} = Operations.withdraw(test_data[:balance], 10_04)
+      assert {:ok, %Money{int: 0, decimal: 0}} = Operations.withdraw(test_data[:balance], 10_05)
     end
 
-    test "Falha ao tentar debitar valores não positivos" do
-      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
-               Operations.withdraw(@balance, 0)
+    test "Falha ao tentar debitar valores não positivos", test_data do
+      assert {:error, "O valor a ser debitado precisa ser positivo"} =
+               Operations.withdraw(test_data[:balance], 0)
 
-      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
-               Operations.withdraw(@balance, -250)
+      assert {:error, "O valor a ser debitado precisa ser positivo"} =
+               Operations.withdraw(test_data[:balance], -250)
 
-      assert {:error, "O valor a ser debitado precisa ser positivo"} ==
-               Operations.withdraw(@balance, "Invalido")
+      assert {:error, "O valor a ser debitado precisa ser positivo"} =
+               Operations.withdraw(test_data[:balance], "Invalido")
     end
 
-    test "Falha ao tentar debitar valores maiores que o saldo disponível" do
-      assert {:error, "Saldo insuficiente"} == Operations.withdraw(@balance, 5012)
-      assert {:error, "Saldo insuficiente"} == Operations.withdraw(@balance, 2500)
-      assert {:error, "Saldo insuficiente"} == Operations.withdraw(@balance, 1006)
+    test "Falha ao tentar debitar valores maiores que o saldo disponível", test_data do
+      assert {:error, "Saldo insuficiente"} = Operations.withdraw(test_data[:balance], 5012)
+      assert {:error, "Saldo insuficiente"} = Operations.withdraw(test_data[:balance], 2500)
+      assert {:error, "Saldo insuficiente"} = Operations.withdraw(test_data[:balance], 1006)
     end
   end
 
   describe "simple_exchange/2" do
     test "Retorna o valor convertido em uma conversão válida" do
-      assert {:ok, 52_50} == Operations.simple_exchange(10_00, 5.25)
-      assert {:ok, 13_60} == Operations.simple_exchange(10_00, 1.35987)
-      assert {:ok, 52_40} == Operations.simple_exchange(10_00, 5.2433)
-      assert {:ok, 79_28} == Operations.simple_exchange(15_10, 5.25)
+      assert {:ok, 52_50} = Operations.simple_exchange(10_00, 5.25)
+      assert {:ok, 13_60} = Operations.simple_exchange(10_00, 1.35987)
+      assert {:ok, 52_40} = Operations.simple_exchange(10_00, 5.2433)
+      assert {:ok, 79_28} = Operations.simple_exchange(15_10, 5.25)
     end
 
     test "Falha ao tentar converter valores inválidos" do
-      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+      assert {:error, "Dados inválidos para conversão entre moedas"} =
                Operations.simple_exchange("10", 5.25)
 
-      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+      assert {:error, "Dados inválidos para conversão entre moedas"} =
                Operations.simple_exchange("Inválido", 13.10)
 
-      assert {:error, "Dados inválidos para conversão entre moedas"} ==
+      assert {:error, "Dados inválidos para conversão entre moedas"} =
                Operations.simple_exchange(25_32, 8)
     end
   end
