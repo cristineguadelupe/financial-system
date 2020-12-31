@@ -5,6 +5,8 @@ defmodule FinancialSystem.Data.Currencies do
 
   alias FinancialSystem.Schemas.Currency
 
+  defguard is_valid_number(number) when is_integer(number) and number > 0 and number < 1000
+
   @currency_data %{
     "BRL" => %Currency{
       code: "BRL",
@@ -39,4 +41,50 @@ defmodule FinancialSystem.Data.Currencies do
   end
 
   def find(_code), do: {:error, "Código inválido"}
+
+  @spec create(
+          code :: String.t(),
+          name :: String.t(),
+          number :: non_neg_integer(),
+          precision :: non_neg_integer()
+        ) :: {:ok, Currency.t()} | {:error, String.t()}
+  def create(code, name, number, precision) do
+    with {:ok, code} <- validate_code(code),
+         {:ok, name} <- validate_name(name),
+         {:ok, number} <- validate_number(number),
+         {:ok, precision} <- validate_precision(precision) do
+      currency = %Currency{
+        code: code,
+        name: name,
+        number: number,
+        precision: precision
+      }
+
+      {:ok, currency}
+    end
+  end
+
+  defp validate_code(code) when is_binary(code) do
+    code
+    |> String.match?(~r/^[a-zA-Z]{3}$/)
+    |> is_valid_code?(code)
+  end
+
+  defp validate_code(code), do: is_valid_code?(false, code)
+
+  defp is_valid_code?(true, code), do: {:ok, String.upcase(code)}
+  defp is_valid_code?(false, _code), do: {:error, "O código precisa conter exatamente 3 letras"}
+
+  defp validate_name(name) when is_binary(name), do: {:ok, name}
+  defp validate_name(_), do: {:error, "Informe um nome válido"}
+
+  defp validate_number(number) when is_valid_number(number), do: {:ok, number}
+  defp validate_number(_number), do: {:error, "O numero precisa estar entre 1 e 999"}
+
+  defp validate_precision(precision) when is_integer(precision) and precision >= 0 do
+    {:ok, precision}
+  end
+
+  defp validate_precision(_precision),
+    do: {:error, "A precisão precisa ser um numero inteiro não negativo"}
 end
