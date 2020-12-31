@@ -51,16 +51,13 @@ defmodule FinancialSystem.Data.Accounts do
     {:ok, account}
   end
 
-  def create(_id, %Money{int: int}) when int < 0 do
-    {:error, "O saldo inicial precisa ser zero ou positivo"}
-  end
-
   def create(id, _balance) when id <= 0 do
     {:error, "O id precisa ser positivo"}
   end
 
-  def create(_id, _balance),
-    do: {:error, "Não é possível abrir uma conta com dados inválidos"}
+  def create(_id, _balance) do
+    {:error, "Não é possível abrir uma conta com dados inválidos"}
+  end
 
   @spec find(id :: integer()) :: {:ok, Account.t()} | {:error, String.t()}
   def find(id) when is_integer(id) do
@@ -108,11 +105,15 @@ defmodule FinancialSystem.Data.Accounts do
     Moneys.create(int, decimal, currency) |> elem(1)
   end
 
-  defp validate_amount(amount) do
+  defp validate_amount("-" <> _rest), do: {:error, "O saldo inicial precisa ser zero ou positivo"}
+
+  defp validate_amount(amount) when is_binary(amount) do
     amount
     |> String.match?(~r/^(\d?.+)[,](\d)+$/)
     |> is_valid_amount?()
   end
+
+  defp validate_amount(_amount), do: is_valid_amount?(false)
 
   defp is_valid_amount?(true), do: {:ok, true}
   defp is_valid_amount?(false), do: {:error, "Informe o saldo inicial no formato 00,00"}
