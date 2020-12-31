@@ -1,9 +1,11 @@
 defmodule FinancialSystem.OperationsTest do
   use ExUnit.Case
+
   require FinancialSystem.Operations
+
+  alias FinancialSystem.Data.Accounts
   alias FinancialSystem.Operations
   alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Data.Accounts
 
   setup_all do
     [

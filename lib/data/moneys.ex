@@ -3,8 +3,7 @@ defmodule FinancialSystem.Data.Moneys do
   Dados falsos para simulação de operações em dados de valores monetários
   """
 
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Schemas.Currency
+  alias FinancialSystem.Schemas.{Currency, Money}
 
   @spec create(int :: integer(), decimal :: integer(), currency :: Currency.t()) ::
           {:ok, Money.t()} | {:error, String.t()}

@@ -2,10 +2,7 @@ defmodule FinancialSystem do
   @moduledoc """
   Implementa as operações de tranferência entre duas ou mais contas
   """
-
-  alias FinancialSystem.Schemas.Account
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Schemas.Currency
+  alias FinancialSystem.Schemas.{Account, Currency, Money}
   alias FinancialSystem.Operations
 
   @spec transfer_from_to(sender :: Account.t(), receiver :: Account.t(), amount :: String.t()) ::

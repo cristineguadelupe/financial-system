@@ -1,11 +1,8 @@
 defmodule FinancialSystem.AccountsTest do
   use ExUnit.Case
 
-  alias FinancialSystem.Schemas.Account
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Schemas.Currency
-  alias FinancialSystem.Data.Accounts
-  alias FinancialSystem.Data.Currencies
+  alias FinancialSystem.Schemas.{Account, Currency, Money}
+  alias FinancialSystem.Data.{Accounts, Currencies}
 
   setup_all do
     [

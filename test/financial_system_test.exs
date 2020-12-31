@@ -1,11 +1,8 @@
 defmodule FinancialSystemTest do
   use ExUnit.Case
 
-  alias FinancialSystem.Schemas.Account
-  alias FinancialSystem.Schemas.Currency
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Data.Accounts
-  alias FinancialSystem.Data.Currencies
+  alias FinancialSystem.Schemas.{Account, Currency, Money}
+  alias FinancialSystem.Data.{Accounts, Currencies}
 
   setup_all do
     [
@@ -69,7 +66,7 @@ defmodule FinancialSystemTest do
                FinancialSystem.transfer_from_to(
                  test_data[:sender],
                  test_data[:receiver],
-                 "-123_09"
+                 "-123,09"
                )
 
       assert {:error, "O valor a ser debitado precisa ser positivo"} =
@@ -315,12 +312,11 @@ defmodule FinancialSystemTest do
 
     test "Falha ao tentar realizar split entre contas com diferentes moedas", test_data do
       assert {:error, "Não é possível realizar split entre diferentes moedas"} =
-        FinancialSystem.split_from_to(
-          test_data[:acc1],
-          [test_data[:acc2], test_data[:acc3], test_data[:usd_account]],
-          10_00
-        )
+               FinancialSystem.split_from_to(
+                 test_data[:acc1],
+                 [test_data[:acc2], test_data[:acc3], test_data[:usd_account]],
+                 10_00
+               )
     end
-
   end
 end

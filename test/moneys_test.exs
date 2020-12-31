@@ -1,9 +1,8 @@
 defmodule FinancialSystem.MoneysTest do
   use ExUnit.Case
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Schemas.Currency
-  alias FinancialSystem.Data.Moneys
-  alias FinancialSystem.Data.Currencies
+
+  alias FinancialSystem.Schemas.{Currency, Money}
+  alias FinancialSystem.Data.{Currencies, Moneys}
 
   describe "create/3" do
     setup do

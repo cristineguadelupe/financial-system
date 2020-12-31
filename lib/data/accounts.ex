@@ -2,11 +2,8 @@ defmodule FinancialSystem.Data.Accounts do
   @moduledoc """
   Dados falsos para simulação de transações em contas
   """
-  alias FinancialSystem.Schemas.Account
-  alias FinancialSystem.Schemas.Money
-
-  alias FinancialSystem.Data.Currencies
-  alias FinancialSystem.Data.Moneys
+  alias FinancialSystem.Data.{Currencies, Moneys}
+  alias FinancialSystem.Schemas.{Account, Money}
 
   @real Currencies.find("BRL") |> elem(1)
 

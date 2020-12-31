@@ -1,6 +1,8 @@
 defmodule FinancialSystem.CurrenciesTest do
   use ExUnit.Case
+
   require FinancialSystem.Data.Currencies
+
   alias FinancialSystem.Schemas.Currency
   alias FinancialSystem.Data.Currencies
 

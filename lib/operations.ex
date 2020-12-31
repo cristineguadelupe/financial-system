@@ -3,8 +3,7 @@ defmodule FinancialSystem.Operations do
   Implementa as operações de incremento e decremento em valores monetários em uma mesma moeda
   e a conversão entre moedas
   """
-  alias FinancialSystem.Schemas.Money
-  alias FinancialSystem.Schemas.Currency
+  alias FinancialSystem.Schemas.{Currency, Money}
 
   defguard is_valid_amount(amount) when is_integer(amount) and amount > 0
 
