@@ -23,23 +23,31 @@ defmodule FinancialSystemTest do
   describe "transfer_from_to/3" do
     test "Retorna os saldos atualizados após uma transferência válida", test_data do
       assert {:ok,
-              {%Account{balance: %Money{int: 150, decimal: 0}},
-               %Account{balance: %Money{int: 110, decimal: 0}}}} =
+              %{
+                sender: %Account{balance: %Money{int: 150, decimal: 0}},
+                receiver: %Account{balance: %Money{int: 110, decimal: 0}}
+              }} =
                FinancialSystem.transfer_from_to(test_data[:sender], test_data[:receiver], 100_00)
 
       assert {:ok,
-              {%Account{balance: %Money{int: 0, decimal: 0}},
-               %Account{balance: %Money{int: 260, decimal: 0}}}} =
+              %{
+                sender: %Account{balance: %Money{int: 0, decimal: 0}},
+                receiver: %Account{balance: %Money{int: 260, decimal: 0}}
+              }} =
                FinancialSystem.transfer_from_to(test_data[:sender], test_data[:receiver], 250_00)
 
       assert {:ok,
-              {%Account{balance: %Money{int: 154, decimal: 88}},
-               %Account{balance: %Money{int: 105, decimal: 12}}}} =
+              %{
+                sender: %Account{balance: %Money{int: 154, decimal: 88}},
+                receiver: %Account{balance: %Money{int: 105, decimal: 12}}
+              }} =
                FinancialSystem.transfer_from_to(test_data[:sender], test_data[:receiver], 95_12)
 
       assert {:ok,
-              {%Account{balance: %Money{int: 154, decimal: 88}},
-               %Account{balance: %Money{int: 105, decimal: 12}}}} =
+              %{
+                sender: %Account{balance: %Money{int: 154, decimal: 88}},
+                receiver: %Account{balance: %Money{int: 105, decimal: 12}}
+              }} =
                FinancialSystem.transfer_from_to(test_data[:sender], test_data[:receiver], "95,12")
     end
 
@@ -120,8 +128,10 @@ defmodule FinancialSystemTest do
   describe "international_tranfer_from_to/5" do
     test "Retorna os saldos atualizados após uma transferência internacional válida", test_data do
       assert {:ok,
-              {%Account{balance: %Money{int: 196, decimal: 45}},
-               %Account{balance: %Money{int: 60, decimal: 20}}}} =
+              %{
+                sender: %Account{balance: %Money{int: 196, decimal: 45}},
+                receiver: %Account{balance: %Money{int: 60, decimal: 20}}
+              }} =
                FinancialSystem.international_transfer(
                  test_data[:sender],
                  test_data[:usd_account],
@@ -131,8 +141,10 @@ defmodule FinancialSystemTest do
                )
 
       assert {:ok,
-              {%Account{balance: %Money{int: 169, decimal: 41}},
-               %Account{balance: %Money{int: 65, decimal: 35}}}} =
+              %{
+                sender: %Account{balance: %Money{int: 169, decimal: 41}},
+                receiver: %Account{balance: %Money{int: 65, decimal: 35}}
+              }} =
                FinancialSystem.international_transfer(
                  test_data[:sender],
                  test_data[:usd_account],
@@ -216,12 +228,14 @@ defmodule FinancialSystemTest do
 
     test "Retorna os saldos atualizados quando um split é realizado com sucesso", test_data do
       assert {:ok,
-              {%Account{balance: %Money{int: 200, decimal: 0}},
-               [
-                 %Account{balance: %Money{int: 43, decimal: 33}},
-                 %Account{balance: %Money{int: 33, decimal: 33}},
-                 %Account{balance: %Money{int: 58, decimal: 65}}
-               ]}} =
+              %{
+                sender: %Account{balance: %Money{int: 200, decimal: 0}},
+                receivers: [
+                  %Account{balance: %Money{int: 43, decimal: 33}},
+                  %Account{balance: %Money{int: 33, decimal: 33}},
+                  %Account{balance: %Money{int: 58, decimal: 65}}
+                ]
+              }} =
                FinancialSystem.split_from_to(
                  test_data[:acc1],
                  [test_data[:acc2], test_data[:acc3], test_data[:acc4]],
@@ -229,11 +243,13 @@ defmodule FinancialSystemTest do
                )
 
       assert {:ok,
-              {%Account{balance: %Money{int: 0, decimal: 0}},
-               [
-                 %Account{balance: %Money{int: 160, decimal: 00}},
-                 %Account{balance: %Money{int: 150, decimal: 00}}
-               ]}} =
+              %{
+                sender: %Account{balance: %Money{int: 0, decimal: 0}},
+                receivers: [
+                  %Account{balance: %Money{int: 160, decimal: 00}},
+                  %Account{balance: %Money{int: 150, decimal: 00}}
+                ]
+              }} =
                FinancialSystem.split_from_to(
                  test_data[:acc1],
                  [test_data[:acc2], test_data[:acc3]],

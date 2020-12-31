@@ -6,28 +6,35 @@ defmodule FinancialSystem do
   alias FinancialSystem.Operations
 
   @spec transfer_from_to(sender :: Account.t(), receiver :: Account.t(), amount :: String.t()) ::
-          {atom(), {Account.t(), Account.t()}} | {atom(), String.t()}
+          {:ok, %{sender: Account.t(), receiver: Account.t()}} | {:error, String.t()}
   def transfer_from_to(sender, receiver, amount) when is_binary(amount) do
     transfer_from_to(sender, receiver, to_int(amount))
   end
 
   @spec transfer_from_to(sender :: Account.t(), receiver :: Account.t(), amount :: integer()) ::
-          {atom(), {Account.t(), Account.t()}} | {atom(), String.t()}
+          {:ok, %{sender: Account.t(), receiver: Account.t()}} | {:error, String.t()}
   def transfer_from_to(sender, receiver, amount) do
     with {:ok, sender} <- debit_from(sender, amount),
          {:ok, receiver} <- deposit_to(receiver, amount),
          {:ok, _currency} <- validate_currencies(sender, receiver) do
-      {:ok, {sender, receiver}}
+      {:ok, %{sender: sender, receiver: receiver}}
     end
   end
 
+  @spec split_from_to(
+          sender :: Account.t(),
+          receivers :: nonempty_list(Account.t()),
+          amount :: non_neg_integer()
+        ) ::
+          {:ok, %{sender: Account.t(), receivers: nonempty_list(Account.t())}}
+          | {:error, String.t()}
   def split_from_to(sender, receivers, amount) do
     with {:ok, _valid_receivers} <- validate_receivers(receivers),
          {:ok, splited_amount} <- Operations.split_amount_by(receivers, amount),
          {:ok, sender} <- debit_from(sender, amount),
          {:ok, receivers} <- batch_deposit(receivers, splited_amount),
          {:ok, _message} <- batch_validate_currencies(sender, receivers) do
-      {:ok, {sender, receivers}}
+      {:ok, %{sender: sender, receivers: receivers}}
     end
   end
 
@@ -37,13 +44,13 @@ defmodule FinancialSystem do
           amount :: integer(),
           currency :: Currency.t(),
           rate :: float()
-        ) :: {:ok, {Account.t(), Account.t()}} | {:error, String.t()}
+        ) :: {:ok, %{sender: Account.t(), receiver: Account.t()}} | {:error, String.t()}
   def international_transfer(sender, receiver, amount, currency, rate) do
     with {:ok, converted_amount} <- Operations.simple_exchange(amount, rate),
          {:ok, sender} <- debit_from(sender, converted_amount),
          {:ok, receiver} <- deposit_to(receiver, amount),
          {:ok, _currency} <- validate_currencies(receiver, currency) do
-      {:ok, {sender, receiver}}
+      {:ok, %{sender: sender, receiver: receiver}}
     end
   end
 
