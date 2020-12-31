@@ -28,20 +28,39 @@ defmodule FinancialSystem.Data.Accounts do
   @doc """
   Função para aberturas de contas.
   Recebe o id e o saldo de abertura
-  Só é possível abrir contas em moeda real
+  As contas são abertas por padrão em moeda real
+  Retorna {:ok, account} ou {:error, reason}
   """
-  @spec open_account(id :: integer(), balance :: String.t()) ::
+  @spec open_account(id :: non_neg_integer(), balance :: String.t()) ::
           {:ok, Account.t()} | {:error, String.t()}
   def open_account(id, amount) do
-    balance = string_to_money(amount, @real)
-    create(id, balance)
+    with {:ok, true} <- validate_amount(amount) do
+      balance = string_to_money(amount)
+      create(id, balance)
+    end
   end
 
-  @spec create(id :: integer(), balance :: Money.t()) :: {:ok, Account.t()} | {:error, String.t()}
-  def create(id, balance) do
+  @doc """
+  Cria uma conta a partir de um id e um valor monetário inicial
+  Retorna {:ok, account} ou {:error, reason}
+  """
+  @spec create(id :: non_neg_integer(), balance :: Money.t()) ::
+          {:ok, Account.t()} | {:error, String.t()}
+  def create(id, %Money{int: int} = balance) when is_integer(id) and int >= 0 and id > 0 do
     account = %Account{id: id, balance: balance}
     {:ok, account}
   end
+
+  def create(_id, %Money{int: int}) when int < 0 do
+    {:error, "O saldo inicial precisa ser zero ou positivo"}
+  end
+
+  def create(id, _balance) when id <= 0 do
+    {:error, "O id precisa ser positivo"}
+  end
+
+  def create(_id, _balance),
+    do: {:error, "Não é possível abrir uma conta com dados inválidos"}
 
   @spec find(id :: integer()) :: {:ok, Account.t()} | {:error, String.t()}
   def find(id) when is_integer(id) do
@@ -59,7 +78,7 @@ defmodule FinancialSystem.Data.Accounts do
   Retorna o valor monetário do montante
   """
   @spec string_to_money(value :: String.t(), currency :: Currency.t()) :: Money.t()
-  def string_to_money(value, currency) do
+  def string_to_money(value, currency \\ @real) do
     value
     |> split_int_and_decimal()
     |> clear_int()
@@ -88,4 +107,13 @@ defmodule FinancialSystem.Data.Accounts do
   defp to_money({int, decimal}, currency) do
     Moneys.create(int, decimal, currency) |> elem(1)
   end
+
+  defp validate_amount(amount) do
+    amount
+    |> String.match?(~r/^(\d?.+)[,](\d)+$/)
+    |> is_valid_amount?()
+  end
+
+  defp is_valid_amount?(true), do: {:ok, true}
+  defp is_valid_amount?(false), do: {:error, "Informe o saldo inicial no formato 00,00"}
 end
