@@ -66,13 +66,13 @@ defmodule FinancialSystem.Data.Accounts do
 
   def find(_id), do: {:error, "Conta inválida"}
 
-  @doc """
-  Pipeline auxiliar para converter string em valor monetário
-  Recebe o montante e a moeda
-  Retorna o valor monetário do montante
-  """
+
+  # Pipeline auxiliar para converter string em valor monetário
+  # Recebe o montante e a moeda
+  # Retorna o valor monetário do montante
+
   @spec string_to_money(value :: String.t(), currency :: Currency.t()) :: Money.t()
-  def string_to_money(value, currency \\ @real) do
+  defp string_to_money(value, currency \\ @real) do
     value
     |> split_int_and_decimal()
     |> clear_int()
@@ -110,7 +110,7 @@ defmodule FinancialSystem.Data.Accounts do
     |> is_valid_amount?()
   end
 
-  defp validate_amount(_amount), do: is_valid_amount?(false)
+  defp validate_amount(_amount), do: {:error, "O saldo inicial precisa ser uma string no formato 00,00"}
 
   defp is_valid_amount?(true), do: {:ok, true}
   defp is_valid_amount?(false), do: {:error, "Informe o saldo inicial no formato 00,00"}
