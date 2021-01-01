@@ -3,7 +3,11 @@ defmodule FinancialSystem do
   Implementa as operações de tranferência entre duas ou mais contas
   """
   alias FinancialSystem.Schemas.{Account, Currency, Money}
-  alias FinancialSystem.Operations
+
+  defdelegate simple_exchange(amount, rate), to: FinancialSystem.Operations
+  defdelegate split_amount_by(receivers, amount), to: FinancialSystem.Operations
+  defdelegate withdraw(account, amount), to: FinancialSystem.Operations
+  defdelegate deposit(account, amount), to: FinancialSystem.Operations
 
   @spec transfer_from_to(sender :: Account.t(), receiver :: Account.t(), amount :: String.t()) ::
           {:ok, %{sender: Account.t(), receiver: Account.t()}} | {:error, String.t()}
@@ -30,7 +34,7 @@ defmodule FinancialSystem do
           | {:error, String.t()}
   def split_from_to(sender, receivers, amount) do
     with {:ok, _valid_receivers} <- validate_receivers(receivers),
-         {:ok, splited_amount} <- Operations.split_amount_by(receivers, amount),
+         {:ok, splited_amount} <- split_amount_by(receivers, amount),
          {:ok, sender} <- debit_from(sender, amount),
          {:ok, receivers} <- batch_deposit(receivers, splited_amount),
          {:ok, _message} <- batch_validate_currencies(sender, receivers) do
@@ -46,7 +50,7 @@ defmodule FinancialSystem do
           rate :: float()
         ) :: {:ok, %{sender: Account.t(), receiver: Account.t()}} | {:error, String.t()}
   def international_transfer(sender, receiver, amount, currency, rate) do
-    with {:ok, converted_amount} <- Operations.simple_exchange(amount, rate),
+    with {:ok, converted_amount} <- simple_exchange(amount, rate),
          {:ok, sender} <- debit_from(sender, converted_amount),
          {:ok, receiver} <- deposit_to(receiver, amount),
          {:ok, _currency} <- validate_currencies(receiver, currency) do
@@ -57,7 +61,7 @@ defmodule FinancialSystem do
   defp debit_from({:ok, account}, amount) do
     account
     |> Map.fetch!(:balance)
-    |> Operations.withdraw(amount)
+    |> withdraw(amount)
     |> maybe_update_account(account)
   end
 
@@ -67,7 +71,7 @@ defmodule FinancialSystem do
   defp deposit_to({:ok, account}, amount) do
     account
     |> Map.fetch!(:balance)
-    |> Operations.deposit(amount)
+    |> deposit(amount)
     |> maybe_update_account(account)
   end
 
