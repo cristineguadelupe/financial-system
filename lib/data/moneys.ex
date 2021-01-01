@@ -5,15 +5,22 @@ defmodule FinancialSystem.Data.Moneys do
 
   alias FinancialSystem.Schemas.{Currency, Money}
 
+  defdelegate validate_currency(code, name, number, precision),
+    to: FinancialSystem.Data.Currencies,
+    as: :create
+
   @spec create(int :: integer(), decimal :: integer(), currency :: Currency.t()) ::
           {:ok, Money.t()} | {:error, String.t()}
-  def create(int, decimal, currency) do
+  def create(int, decimal, %Currency{code: code, name: name, number: number, precision: precision}) do
     with {:ok, int} <- validate_int(int),
+         {:ok, currency} <- validate_currency(code, name, number, precision),
          {:ok, decimal} <- validate_decimal(decimal, currency) do
       money = %Money{int: int, decimal: decimal, currency: currency}
       {:ok, money}
     end
   end
+
+  def create(_int, _decimal, _currency), do: {:error, "Moeda inválida"}
 
   defp validate_int(int) when is_integer(int) and int >= 0, do: {:ok, int}
   defp validate_int(_int), do: {:error, "A parte inteira não pode ser negativa"}

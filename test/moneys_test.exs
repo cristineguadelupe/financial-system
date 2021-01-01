@@ -44,6 +44,16 @@ defmodule FinancialSystem.MoneysTest do
 
       assert {:error, "A parte decimal não pode conter mais dígitos que a precisão da moeda"} =
                Moneys.create(123, 128, test_data[:real])
+
+      assert {:error, "Moeda inválida"} = Moneys.create(123, 128, "inválido")
+
+      assert {:error, "O código precisa conter exatamente 3 letras"} =
+               Moneys.create(123, 128, %Currency{
+                 code: "BRAZ",
+                 name: "Código Inválido",
+                 number: 123,
+                 precision: 2
+               })
     end
   end
 end
