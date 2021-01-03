@@ -9,6 +9,12 @@ defmodule FinancialSystem.Data.Moneys do
     to: FinancialSystem.Data.Currencies,
     as: :create
 
+  @doc """
+  Cria um valor monetário a ser representado por sua parte inteira, sua parte decimal
+  e sua moeda
+  Recebe como entrada a parte inteira, a parte decimal e a moeda
+  Retorna uma tupla com :ok e o valor monetário recém criado ou {:error, reason}
+  """
   @spec create(int :: integer(), decimal :: integer(), currency :: Currency.t()) ::
           {:ok, Money.t()} | {:error, String.t()}
   def create(int, decimal, %Currency{code: code, name: name, number: number, precision: precision}) do

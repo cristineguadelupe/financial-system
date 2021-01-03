@@ -9,6 +9,12 @@ defmodule FinancialSystem do
   defdelegate withdraw(account, amount), to: FinancialSystem.Operations
   defdelegate deposit(account, amount), to: FinancialSystem.Operations
 
+  @doc """
+  Operação de transferência entre contas de uma mesma moeda
+  Recebe como parâmentros a conta de origem, a conta de destino e o valor a ser transferido.
+  Retorna uma tupla com :ok e as contas com seus respectivos saldos atualizados, em caso de sucesso
+  ou {:error, reason} em caso de falha
+  """
   @spec transfer_from_to(sender :: Account.t(), receiver :: Account.t(), amount :: String.t()) ::
           {:ok, %{sender: Account.t(), receiver: Account.t()}} | {:error, String.t()}
   def transfer_from_to(sender, receiver, amount) when is_binary(amount) do
@@ -25,6 +31,14 @@ defmodule FinancialSystem do
     end
   end
 
+  @doc """
+  Realiza o rateio de valors monetários entre duas ou mais contas de destino
+  Recebe como entrada a conta de origem e uma lista com as contas de destino e por fim o valor
+  a ser igualmente dividido entre as mesmas
+  Retorna uma uma tulpla com :ok e um mapa com a conta de origem e a lista das contas de destino com
+  seus respectivos saldos atualizados caso a operação seja realizada com sucesso e
+  {:error, reason} caso falhe
+  """
   @spec split_from_to(
           sender :: Account.t(),
           receivers :: nonempty_list(Account.t()),
@@ -42,6 +56,13 @@ defmodule FinancialSystem do
     end
   end
 
+  @doc """
+  Operação de transfêrencia entre contas de diferentes moedas
+  Recebe como parâmetros a conta de origem, a conta de destino, o valor a ser tranferido,
+  a moeda da conta de destino e taxa cambial da moeda de destino para a de origem
+  Retorna uma tupla com :ok e as contas com seus saldos atualizados em caso de sucesso
+  ou {:error, reason} em caso de falha
+  """
   @spec international_transfer(
           sender :: Account.t(),
           receiver :: Account.t(),

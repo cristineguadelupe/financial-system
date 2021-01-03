@@ -14,6 +14,11 @@ defmodule FinancialSystem.Operations do
            when is_list(receivers) and is_integer(amount) and length(receivers) >= 2 and
                   amount > 0
 
+  @doc """
+  Realiza o débito de um dado montade em um valor monetário
+  Recebe como parâmetros um valor monétário e o valor a ser debitado
+  Retorna uma tupla com :ok e o valor monetário atualizado ou {:error, reason}
+  """
   @spec withdraw(balance :: Money.t(), amount :: integer()) ::
           {:ok, Money.t()} | {:error, String.t()}
   def withdraw(balance, amount) when is_valid_amount(amount) do
@@ -27,6 +32,11 @@ defmodule FinancialSystem.Operations do
 
   def withdraw(_balance, _amount), do: {:error, "O valor a ser debitado precisa ser positivo"}
 
+  @doc """
+  Credita um montante a um dado valor monetário
+  Recebe como parâmetros o valor monetário e o valor a ser creditado
+  Retorna uma tupla com :ok e o valor monetário atualizado ou {:error, reason}
+  """
   @spec deposit(balance :: Money.t(), amount :: integer()) ::
           {:ok, Money.t()} | {:error, String.t()}
   def deposit(balance, amount) when is_valid_amount(amount) do
@@ -41,6 +51,8 @@ defmodule FinancialSystem.Operations do
 
   @doc """
   Conversão simples entre moedas supondo que o montande e a taxa de câmbio sejam válidos
+  Recebe como entrada o valor a ser convertido e a taxa de conversão
+  Retorna uma tupla com :ok e o valor convertido ou {:error, reason}
   """
   @spec simple_exchange(amount :: integer(), rate :: float()) :: {:ok, integer()}
   def simple_exchange(amount, rate) when is_valid_exchange(amount, rate) do
@@ -61,6 +73,11 @@ defmodule FinancialSystem.Operations do
     {:error, "O split necessita de ao menos duas contas de destino"}
   end
 
+  @doc """
+  Divide um valor igualmente entre um número n de contas
+  Recebe uma lista de contas e o valor a ser rateado entre as mesmas
+  Retorna uma tupla com :ok e o valor dividido ou {:error, reason}
+  """
   @spec split_amount_by(receivers :: nonempty_list(Account.t()), amount :: non_neg_integer()) ::
           {:ok, non_neg_integer()} | {:error, String.t()}
   def split_amount_by(receivers, amount) when is_valid_split(receivers, amount) do

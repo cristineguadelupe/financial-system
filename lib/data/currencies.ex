@@ -42,6 +42,11 @@ defmodule FinancialSystem.Data.Currencies do
 
   def find(_code), do: {:error, "Código inválido"}
 
+  @doc """
+  Cria uma moeda seguindo a especificação do padrão internacional ISO 4217
+  Recebe como entrada o código de 3 letras, o nome da moeda, o número da moeda e a precisão da mesma
+  Retorna uma tupla com :ok e a moeda recém criada ou {:error, reason}
+  """
   @spec create(
           code :: String.t(),
           name :: String.t(),
