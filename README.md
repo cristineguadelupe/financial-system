@@ -1,32 +1,5 @@
 # Sistema Financeiro
 
-<details open="open">
-  <summary><h2 style="display: inline-block">Index</h2></summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">Sobre o projeto</a>
-      <ul>
-        <li><a href="#built-with">Tecnologias</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Instruções</a>
-      <ul>
-        <li><a href="#prerequisites">Pré requisitos</a></li>
-        <li><a href="#installation">Instalação</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Principais recursos</a></li>
-    <li>
-      <a href="#overview">Visão geral</a>
-      <ul>
-        <li><a href="#roadmap">Melhorias futuras</a></li>
-      </ul>
-    </li>
-  </ol>
-</details>
-
-
 ## Sobre o projeto
 
 Aplicação backend de um sistema financeiro que possibilita a transferência entre contas de uma mesma moeda, rateio de valores entre duas ou mais contas de uma mesma moeda e conversão entre moedas para transferências internacionais.
