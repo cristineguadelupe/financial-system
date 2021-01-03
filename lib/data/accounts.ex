@@ -6,6 +6,8 @@ defmodule FinancialSystem.Data.Accounts do
   alias FinancialSystem.Schemas.{Account, Money}
 
   @real Currencies.find("BRL") |> elem(1)
+  @usd Currencies.find("USD") |> elem(1)
+  @euro Currencies.find("EUR") |> elem(1)
 
   @account_data %{
     1 => %Account{
@@ -19,6 +21,14 @@ defmodule FinancialSystem.Data.Accounts do
     3 => %Account{
       id: 3,
       balance: Moneys.create(225, 10, @real) |> elem(1)
+    },
+    11 => %Account{
+      id: 11,
+      balance: Moneys.create(15, 22, @usd) |> elem(1)
+    },
+    22 => %Account{
+      id: 22,
+      balance: Moneys.create(63, 00, @euro) |> elem(1)
     }
   }
 
@@ -66,7 +76,6 @@ defmodule FinancialSystem.Data.Accounts do
 
   def find(_id), do: {:error, "Conta inválida"}
 
-
   # Pipeline auxiliar para converter string em valor monetário
   # Recebe o montante e a moeda
   # Retorna o valor monetário do montante
@@ -110,7 +119,9 @@ defmodule FinancialSystem.Data.Accounts do
     |> is_valid_amount?()
   end
 
-  defp validate_amount(_amount), do: {:error, "O saldo inicial precisa ser uma string no formato 00,00"}
+  defp validate_amount(_amount) do
+    {:error, "O saldo inicial precisa ser uma string no formato 00,00"}
+  end
 
   defp is_valid_amount?(true), do: {:ok, true}
   defp is_valid_amount?(false), do: {:error, "Informe o saldo inicial no formato 00,00"}
