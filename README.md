@@ -1,5 +1,7 @@
 # Sistema Financeiro
 
+[![Coverage Status](https://coveralls.io/repos/github/cristineguadelupe/financial-system/badge.svg?t=IBYgYY)](https://coveralls.io/github/cristineguadelupe/financial-system)
+
 ## Sobre o projeto
 
 Aplicação backend de um sistema financeiro que possibilita a transferência entre contas de uma mesma moeda, rateio de valores entre duas ou mais contas de uma mesma moeda e conversão entre moedas para transferências internacionais.
